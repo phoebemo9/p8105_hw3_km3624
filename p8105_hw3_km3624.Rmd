@@ -81,3 +81,63 @@ instacart %>%
   )
 ```
 
+### Problem 2
+
+Load, tidy, and otherwise wrangle the data
+
+```{r}
+accel_df =
+  read.csv("./data/accel_data.csv") %>%
+  janitor::clean_names() %>%
+  pivot_longer(
+    activity_1:activity_1440,
+    names_prefix = "activity_",
+    names_to = "min_of_day",
+    values_to = "activity_count"
+  ) %>%
+  mutate(
+    dow = ifelse(day == "Saturday", "weekend",
+          ifelse(day == "Sunday", "weekend", "weekday")),
+    min_of_day = as.numeric(min_of_day)
+  )
+```
+This resulting dataset has totally `r nrow(accel_df)` observations, each is about the
+activity count in each minute of a day in a specific week. There are variables: week,
+day_id, day, dow(day of week), minute of the day, and the activity counts. There are totally five weeks and 35 days in this dataset, and the mean activity count in these 35 days is `r mean(pull(accel_df, activity_count))`
+
+Now create a table showing total activity over the day
+
+```{r}
+accel_df %>%
+  group_by(week, day) %>%
+  summarize(
+    activity_daily = sum(activity_count)
+  ) %>%
+  pivot_wider(
+    names_from = "day",
+    values_from = "activity_daily"
+  ) %>%
+  select("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday") %>%
+  knitr::kable()
+```
+
+Observing the table, it is significant that in week 1, there are less activity counts, especially in weekdays and Saturday. Also, the activity counts during Tuesday and Wednesday are relatively stable. The activity counts on Sunday is mostly decreasing during these 5 weeks.
+
+Now, make a plot showing 24-hour activity time courses for each day
+
+```{r}
+accel_df %>%
+  group_by(day) %>%
+  ggplot(aes(x = min_of_day, y = activity_count, color = day)) +
+  geom_line(alpha = 0.5) +
+  theme(legend.position = "bottom", plot.title = element_text(size = 15, hjust = 0.5)) +
+  labs(
+    title = "Activity during a day",
+    x = "minute (min)",
+    y = "activity counts"
+  )
+```
+
+Observing the plot, we can find that during a day, the activity count starts to increase from approximately 270 min of the beginning of every day. On Friday, the patient has significant higher activity at around 8pm and on Sunday, there is much more activity at around noon. For other days, their activity count is relatively stable during a day after the early morning.
+
+
