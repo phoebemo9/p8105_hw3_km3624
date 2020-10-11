@@ -180,48 +180,31 @@ For snowfall, the most common observed value is 0, where there are 2008508 recor
 Now, make a two-panel plot showing the average max temperature in January and July in each station across years.
 
 ```{r}
-plot_Jan =
+plot_temp =
   ny_noaa_df %>%
-  filter(month == "01") %>%
+  filter(month == c("01", "07")) %>%
   filter(!is.na(tmax)) %>%
   mutate(
     year = as.numeric(year)
   ) %>%
-  group_by(month, year, id) %>%
+  group_by(year, month, id) %>%
   summarize(mean_max = mean(tmax, na.rm = T)) %>%
-  ggplot(aes(x = year, y = mean_max, color = id)) +
-  geom_line() +
+  ggplot(aes(x = year, y = mean_max, color = id, group = id)) +
+  geom_point(alpha = 0.5) +
+  geom_path(alpha = 0.5) +
+  facet_grid(. ~ month) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1), legend.position = "none", plot.title = element_text(size = 15, hjust = 0.5)) +
-  scale_x_continuous(breaks = seq(from = 1980, to = 2010, by = 1)) +
+  scale_x_continuous(breaks = seq(from = 1980, to = 2010, by = 5)) +
   labs(
     title = "Average max temperature in January",
     x = "Year",
     y = "Average Max Temperature"
   )
 
-plot_July =
-  ny_noaa_df %>%
-  filter(month == "07") %>%
-  filter(!is.na(tmax)) %>%
-  mutate(
-    year = as.numeric(year)
-  ) %>%
-  group_by(month, year, id) %>%
-  summarize(mean_max = mean(tmax, na.rm = T)) %>%
-  ggplot(aes(x = year, y = mean_max, color = id)) +
-  geom_line() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1), legend.position = "none", plot.title = element_text(size = 15, hjust = 0.5)) +
-  scale_x_continuous(breaks = seq(from = 1980, to = 2010, by = 1)) +
-  labs(
-    title = "Average max temperature in July",
-    x = "Year",
-    y = "Avg Max Temperature"
-  )
-
-plot_Jan / plot_July
+plot_temp
 ```
 
-Observing the two plots together, we can know that in January, current year's average of max is increasing. That is, the average max temperature is increasing in the winter case. The structure is like a wave-shape, which means the average max temperature fluctuates in these 30 years. There is an outlier in January of 1982, in which the average max temperture is lower than -12.5.
+Observing the plot, the average max temperature is much greater than that of January. We can also know that in January, current year's average of max is increasing. That is, the average max temperature is increasing in the winter case. The structure is like a wave-shape, which means the average max temperature fluctuates in these 30 years. There is an outlier in January of 1982, in which the average max temperture is lower than -12.5.
 
 For July, the average of max temperature is also increasing, and this is apparent in 2010. We can also observe that this plot has a relatively stable wave-like structure than the previous one. In approximately 4-year interval, the average max temperature in July will decrease relatively sharp in a time period, and there is an outlier in July of 1988, which is lower than 15.
 
